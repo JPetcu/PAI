@@ -5,7 +5,7 @@
 #include <cstdlib>      // std::rand, std::srand
 #include <memory>
 
-long long myrandom(int i) { return (std::rand()*std::rand() % i)*std::rand() % i; }
+long long myrandom(int i) { return ((std::rand()*std::rand() % i)*std::rand() % i)*std::rand()*12%i; }
 Deck::Deck() : currentCard(0)
 {
 	for (int i = 0; i<4; i++)

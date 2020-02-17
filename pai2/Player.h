@@ -5,8 +5,10 @@
 class Player
 {
 	std::shared_ptr<Card> mCard1, mCard2;
-	int mChips;
+	int mChips, pNo;
 public:
+	static int spNo;
+
 	Player();
 	void receiveCard(const std::shared_ptr<Card> &card);
 	std::shared_ptr<Card> getCard1();
@@ -16,6 +18,7 @@ public:
 	void updateChips(int a);
 	int getChips();
 	void printBalance();
+	int getNo();
 	~Player();
 };
 

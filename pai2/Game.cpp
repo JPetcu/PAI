@@ -36,13 +36,16 @@ void Game::init()
 	}
 	std::vector<int>::iterator it = std::max_element(rank.begin(), rank.end());
 	showGame();
-	std::cout << "\nWinner is Player" << std::distance(rank.begin(), it) + 1 << "\n";
+	std::cout << "\nWinner is Player" << mPlayers[std::distance(rank.begin(), it)]->getNo() << "\n";
 	int k = 0;
 	std::cout << "-------------------------------------\n";
 	for (auto player : mPlayers)
 	{
 		if (player->getChips() >= 1600)
+		{
 			over = true;
+			winner = player->getNo() - 1;
+		}
 		if (k == std::distance(rank.begin(), it))
 			player->updateChips((mPlayers.size()-1) * 20);
 		else
@@ -50,7 +53,7 @@ void Game::init()
 		player->throwCards();
 		k++;
 
-		std::cout << "Player" << k << "has: ";
+		std::cout << "Player" << player->getNo() << " has: ";
 		player->printBalance();
 
 	}
@@ -77,7 +80,7 @@ void Game::showGame()
 	int i = 1;
 	for(auto player : mPlayers)
 	{
-		std::cout << "Player" << i++ << ": " << player->showCards() << "\n";
+		std::cout << "Player" << player->getNo() << ": " << player->showCards() << "\n";
 	}
 	std::cout << "Cards: ";
 	for (auto card : mDownCards)
@@ -87,6 +90,11 @@ void Game::showGame()
 bool Game::getOver()
 {
 	return over;
+}
+
+int Game::getWinner()
+{
+	return winner;
 }
 
 Game::~Game()

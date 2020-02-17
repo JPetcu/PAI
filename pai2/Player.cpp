@@ -4,6 +4,7 @@
 
 Player::Player(): mCard1(nullptr), mCard2(nullptr), mChips(400)
 {
+	pNo = spNo++;
 }
 
 void Player::receiveCard(const std::shared_ptr<Card>& card)
@@ -49,6 +50,11 @@ int Player::getChips()
 void Player::printBalance()
 {
 	std::cout << mChips << "coins\n";
+}
+
+int Player::getNo()
+{
+	return pNo;
 }
 
 
