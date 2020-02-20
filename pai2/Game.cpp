@@ -2,9 +2,10 @@
 #include "Game.h"
 #include "SevenEval/src/SevenEval.h"
 #include <algorithm>
+#include <typeinfo>
 
 
-Game::Game() : mDeck(new Deck())
+Game::Game() : mDeck(new Deck()), cardCounter(52, 0)
 {
 	mPlayers.emplace_back(new Player());
 	mPlayers.emplace_back(new Player());
@@ -12,33 +13,88 @@ Game::Game() : mDeck(new Deck())
 	mPlayers.emplace_back(new Player());
 }
 
-void Game::init()
+
+void Game::initGame()
 {
 	for (auto player : mPlayers)
+	{
 		player->receiveCard(mDeck->draw());
+		cardCounter[player->getCard1()->toValue()]++;
+	}
 	for (auto player : mPlayers)
+	{
 		player->receiveCard(mDeck->draw());
+		cardCounter[player->getCard2()->toValue()]++;
+	}
+}
 
+void Game::dealFlop()
+{
 	std::shared_ptr<Card> deadCard = mDeck->draw();
+	cardCounter[deadCard->toValue()]++;
+
 	mDownCards.emplace_back(mDeck->draw());
 	mDownCards.emplace_back(mDeck->draw());
-	mDownCards.emplace_back(mDeck->draw());
-	deadCard = mDeck->draw();
-	mDownCards.emplace_back(mDeck->draw());
-	deadCard = mDeck->draw();
 	mDownCards.emplace_back(mDeck->draw());
 
+	sendDownCards();
+
+}
+
+void Game::dealTurn()
+{
+	std::shared_ptr<Card> deadCard = mDeck->draw();
+	cardCounter[deadCard->toValue()]++;
+	mDownCards.emplace_back(mDeck->draw());
+	sendDownCards();
+}
+
+void Game::dealRiver()
+{
+	std::shared_ptr<Card> deadCard = mDeck->draw();
+	cardCounter[deadCard->toValue()]++;
+	mDownCards.emplace_back(mDeck->draw());
+	for (auto card : mDownCards)
+		cardCounter[card->toValue()]++;
+	sendDownCards();
+}
+
+
+
+int Game::decideWinner()
+{
 	int i = 0;
 	std::vector<int> rank = { 0, 0, 0, 0, 0 };
-	for(auto player:mPlayers)
+	for (auto player : mPlayers)
 	{
 		rank[i++] = SevenEval::GetRank(player->getCard1()->toValue(), player->getCard2()->toValue(), mDownCards[0]->toValue(), mDownCards[1]->toValue(), mDownCards[2]->toValue(), mDownCards[3]->toValue(), mDownCards[4]->toValue());
 	}
 	std::vector<int>::iterator it = std::max_element(rank.begin(), rank.end());
-	showGame();
-	std::cout << "\nWinner is Player" << mPlayers[std::distance(rank.begin(), it)]->getNo() << "\n";
+	bool draw = false;
+	for (auto it2 = rank.begin(); it2 != rank.end(); it2++)
+	{
+		if (*it == *it2 && mPlayers.size() != 1 && it2 != it)
+			draw = true;
+
+	}
+	if (draw)
+		return -1;
+	return std::distance(rank.begin(), it);
+
+}
+
+void Game::showWinner()
+{
+	winner = this->decideWinner();
+	if (winner >= 0)
+		std::cout << "\nWinner is Player" << mPlayers[this->decideWinner()]->getNo() << "\n";
+	else
+		std::cout << "\nDRAW\n";
+}
+
+void Game::updateChips()
+{
 	int k = 0;
-	std::cout << "-------------------------------------\n";
 	for (auto player : mPlayers)
 	{
 		if (player->getChips() >= 1600)
@@ -46,10 +102,13 @@ void Game::init()
 			over = true;
 			winner = player->getNo() - 1;
 		}
-		if (k == std::distance(rank.begin(), it))
-			player->updateChips((mPlayers.size()-1) * 20);
-		else
-			player->updateChips(-20);
+		if (winner != -1)
+		{
+			if (k == winner)
+				player->updateChips((mPlayers.size() - 1) * 20);
+			else
+				player->updateChips(-20);
+		}
 		player->throwCards();
 		k++;
 
@@ -57,23 +116,41 @@ void Game::init()
 		player->printBalance();
 
 	}
+}
+void Game::erasePlayers()
+{
 	std::vector<std::shared_ptr<Player>>::iterator toBeErased = mPlayers.end();
 	for (auto it = mPlayers.begin(); it != mPlayers.end(); it++)
 	{
 		if ((*it)->getChips() <= 0)
 			toBeErased = it;
 	}
-	if(toBeErased != mPlayers.end())
+	if (toBeErased != mPlayers.end())
 		mPlayers.erase(toBeErased);
 	std::cout << "-------------------------------------\n";
+}
 
+void Game::clearRound()
+{
 	mDownCards.clear();
 	mDeck->shuffle();
-	
-	
-
-
+	mPot = 0;
 }
+
+void Game::playRound()
+{
+	initGame();
+	dealFlop();
+	dealTurn();
+	dealRiver();
+	showGame();
+	showWinner();
+	updateChips();
+	erasePlayers();
+	clearRound();
+}
+
+
 
 void Game::showGame()
 {
@@ -95,6 +172,50 @@ bool Game::getOver()
 int Game::getWinner()
 {
 	return winner;
+}
+
+std::shared_ptr<Action> Game::requestAction(std::shared_ptr<Player> player)
+{
+	return player->getAction();
+}
+
+void Game::requestAction()
+{
+	std::vector<std::shared_ptr<Action>> actions;
+	while(canContinue(actions) != true)
+	{
+		actions.emplace_back(requestAction(mPlayers[getTurn()]));
+	}
+}
+
+void Game::sendDownCards()
+{
+	for (auto player : mPlayers)
+		player->getDownCards(mDownCards);
+}
+
+bool Game::canContinue(std::vector<std::shared_ptr<Action>> actions)
+{
+	if (actions.size() != mPlayers.size())
+		return false;
+	std::string type = actions[0]->getAction();
+	for (auto action : actions)
+		if (action->getAction() != type || type == "RaiseAction")
+			return false;
+	return true;
+}
+
+int Game::getTurn()
+{
+	int turn = playerTurn;
+	playerTurn++;
+	if (playerTurn == mPlayers.size())
+		playerTurn = 0;
+	return turn;
+}
+int Game::currentTurn()
+{
+	return playerTurn;
 }
 
 Game::~Game()

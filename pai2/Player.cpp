@@ -31,6 +31,11 @@ std::string Player::showCards()
 	return mCard1->toString() + " " + mCard2->toString();
 }
 
+void Player::getDownCards(std::vector<std::shared_ptr<Card>> downCards)
+{
+	mDownCards = downCards;
+}
+
 void Player::throwCards()
 {
 	mCard1 = nullptr;
@@ -55,6 +60,13 @@ void Player::printBalance()
 int Player::getNo()
 {
 	return pNo;
+}
+
+std::shared_ptr<Action> Player::getAction()
+{
+	if (mAction)
+		return mAction;
+	return nullptr;
 }
 
 
