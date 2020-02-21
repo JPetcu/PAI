@@ -2,8 +2,9 @@
 #include "CallAction.h"
 
 
-CallAction::CallAction()
+CallAction::CallAction(int a)
 {
+	this->setChips(a);
 }
 
 

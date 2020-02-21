@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include "Action.h"
+#include "BetAction.h"
 
 class Player
 {

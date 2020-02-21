@@ -64,6 +64,7 @@ int Player::getNo()
 
 std::shared_ptr<Action> Player::getAction()
 {
+	mAction = new BetAction(20);
 	if (mAction)
 		return mAction;
 	return nullptr;

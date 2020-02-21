@@ -4,7 +4,7 @@ class CallAction :
 	public Action
 {
 public:
-	CallAction();
+	CallAction(int a);
 	std::string getAction() { return "CallAction"; }
 
 	~CallAction();

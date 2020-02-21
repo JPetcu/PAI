@@ -16,6 +16,7 @@ Game::Game() : mDeck(new Deck()), cardCounter(52, 0)
 
 void Game::initGame()
 {
+	mPot = smallBlind + bigBlind;
 	for (auto player : mPlayers)
 	{
 		player->receiveCard(mDeck->draw());
@@ -134,15 +135,20 @@ void Game::clearRound()
 {
 	mDownCards.clear();
 	mDeck->shuffle();
-	mPot = 0;
+	mPot = smallBlind + bigBlind;
 }
 
 void Game::playRound()
 {
 	initGame();
+	requestAction();
 	dealFlop();
+	requestAction();
 	dealTurn();
+	requestAction();
 	dealRiver();
+	requestAction();
+	decideWinner();
 	showGame();
 	showWinner();
 	updateChips();
@@ -184,7 +190,10 @@ void Game::requestAction()
 	std::vector<std::shared_ptr<Action>> actions;
 	while(canContinue(actions) != true)
 	{
-		actions.emplace_back(requestAction(mPlayers[getTurn()]));
+		if (actions.size() < currentTurn())
+			actions.emplace_back(requestAction(mPlayers[getTurn()]));
+		else
+			actions[getTurn()] = requestAction(mPlayers[getTurn()]);
 	}
 }
 
@@ -198,11 +207,46 @@ bool Game::canContinue(std::vector<std::shared_ptr<Action>> actions)
 {
 	if (actions.size() != mPlayers.size())
 		return false;
+
 	std::string type = actions[0]->getAction();
+	int raise = 0, call = 0, check = 0, fold = 0;
+
+	int k = 0;
 	for (auto action : actions)
-		if (action->getAction() != type || type == "RaiseAction")
-			return false;
-	return true;
+	{
+		if (action->getAction() == "RaiseAction")
+		{
+			raise++;
+			mPot += action->getChips();
+			mPlayers[k]->updateChips(action->getChips()*-1);
+		}
+		if (action->getAction() == "CallAction")
+		{
+			call++;
+			mPot += action->getChips();
+			mPlayers[k]->updateChips(action->getChips()*-1);
+		}
+		if (action->getAction() == "CheckAction")
+		{
+			check++;
+		}
+		if (action->getAction() == "FoldAction")
+		{
+			fold++;
+		}
+		k++;
+	}
+	if (raise > 1)
+	{
+		check = raise - 1;
+		raise = 1;
+	}
+	if(fold + raise == mPlayers.size() || 
+		raise + call == mPlayers.size() ||
+		raise + fold + call == mPlayers.size() ||
+		check == mPlayers.size())
+			return true;
+	return false;
 }
 
 int Game::getTurn()
