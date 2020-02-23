@@ -4,7 +4,7 @@ class BetAction :
 	public Action
 {
 public:
-	BetAction();
+	BetAction(int a) { setChips(a); }
 	std::string getAction() { return "BetAction"; }
 	~BetAction();
 };

@@ -24,6 +24,4 @@ Card::Card()
 }
 
 
-Card::~Card()
-{
-}
+

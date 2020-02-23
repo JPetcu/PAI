@@ -16,7 +16,7 @@ Game::Game() : mDeck(new Deck()), cardCounter(52, 0)
 
 void Game::initGame()
 {
-	mPot = smallBlind + bigBlind;
+	mPot = /*smallBlind + bigBlind;*/ 0;
 	for (auto player : mPlayers)
 	{
 		player->receiveCard(mDeck->draw());
@@ -95,6 +95,7 @@ void Game::showWinner()
 
 void Game::updateChips()
 {
+	int total = 0;
 	int k = 0;
 	for (auto player : mPlayers)
 	{
@@ -106,16 +107,22 @@ void Game::updateChips()
 		if (winner != -1)
 		{
 			if (k == winner)
-				player->updateChips((mPlayers.size() - 1) * 20);
+				player->updateChips((mPot - player->getBet()));
 			else
-				player->updateChips(-20);
+				player->updateChips(player->getBet()*-1);
 		}
 		player->throwCards();
 		k++;
 
 		std::cout << "Player" << player->getNo() << " has: ";
 		player->printBalance();
-
+		player->clearBet();
+		total += player->getChips();
+	}
+	std::cout << "Total: " << total << "\n";
+	if(total != 1600)
+	{
+		total = 5;
 	}
 }
 void Game::erasePlayers()
@@ -135,7 +142,8 @@ void Game::clearRound()
 {
 	mDownCards.clear();
 	mDeck->shuffle();
-	mPot = smallBlind + bigBlind;
+	mPot = /*smallBlind + bigBlind;*/ 0;
+	requiredToPlay = bigBlind;
 }
 
 void Game::playRound()
@@ -180,9 +188,20 @@ int Game::getWinner()
 	return winner;
 }
 
-std::shared_ptr<Action> Game::requestAction(std::shared_ptr<Player> player)
+std::shared_ptr<Action> Game::requestAction(std::shared_ptr<Player> player, const int bet)
 {
-	return player->getAction();
+	std::shared_ptr<Action> action = player->getAction(bet);
+	if(action->getAction() == "BetAction")
+	{
+		mPot += action->getChips();
+		requiredToPlay = player->getBet();
+	}
+	if (action->getAction() == "CallAction")
+	{
+		mPot += action->getChips();
+		//requiredToPlay += action->getChips();
+	}
+	return action;
 }
 
 void Game::requestAction()
@@ -190,11 +209,13 @@ void Game::requestAction()
 	std::vector<std::shared_ptr<Action>> actions;
 	while(canContinue(actions) != true)
 	{
-		if (actions.size() < currentTurn())
-			actions.emplace_back(requestAction(mPlayers[getTurn()]));
+		int bet = requiredToPlay - mPlayers[currentTurn()]->getBet();
+		if (actions.size() != mPlayers.size() )
+			actions.emplace_back(requestAction(mPlayers[getTurn()],bet));
 		else
-			actions[getTurn()] = requestAction(mPlayers[getTurn()]);
+			actions[getTurn()] = requestAction(mPlayers[getTurn()],bet);
 	}
+	
 }
 
 void Game::sendDownCards()
@@ -214,17 +235,13 @@ bool Game::canContinue(std::vector<std::shared_ptr<Action>> actions)
 	int k = 0;
 	for (auto action : actions)
 	{
-		if (action->getAction() == "RaiseAction")
+		if (action->getAction() == "BetAction")
 		{
 			raise++;
-			mPot += action->getChips();
-			mPlayers[k]->updateChips(action->getChips()*-1);
 		}
 		if (action->getAction() == "CallAction")
 		{
 			call++;
-			mPot += action->getChips();
-			mPlayers[k]->updateChips(action->getChips()*-1);
 		}
 		if (action->getAction() == "CheckAction")
 		{

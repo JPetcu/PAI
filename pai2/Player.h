@@ -12,9 +12,12 @@ class Player
 	std::vector<std::shared_ptr<Card>> mDownCards;
 	std::shared_ptr<Action> mAction;
 	bool isPlaying;
+	int mBet = 0;
 public:
 	static int spNo;
 	Player();
+	int getBet();
+	void clearBet();
 	void receiveCard(const std::shared_ptr<Card> &card);
 	std::shared_ptr<Card> getCard1();
 	std::shared_ptr<Card> getCard2();
@@ -25,7 +28,7 @@ public:
 	int getChips();
 	void printBalance();
 	int getNo();
-	std::shared_ptr<Action> getAction();
+	std::shared_ptr<Action> getAction(int call = 0);
 	~Player();
 };
 

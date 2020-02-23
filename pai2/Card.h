@@ -32,9 +32,10 @@ BETTER_ENUM(Suit, int,
 public:
 	Card();
 	Card(int i, int j);
+	int getFaceValue() { return faceValue; }
 
 	std::string toString();
 	int toValue() { return faceValue * 4 + suit; };
-	~Card();
+	~Card() = default;
 };
 
