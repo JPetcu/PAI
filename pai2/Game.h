@@ -2,11 +2,13 @@
 #include <memory>
 #include "Deck.h"
 #include "Player.h"
+#include "Cashier.h"
 
 
 class Game
 {
 	std::unique_ptr<Deck> mDeck;
+	std::shared_ptr<Cashier> mCashier;
 	std::vector<std::shared_ptr<Player>> mPlayers;
 	std::vector<std::shared_ptr<Card>> mDownCards;
 	std::vector<int> cardCounter;

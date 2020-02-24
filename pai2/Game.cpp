@@ -11,6 +11,7 @@ Game::Game() : mDeck(new Deck()), cardCounter(52, 0)
 	mPlayers.emplace_back(new Player());
 	mPlayers.emplace_back(new Player());
 	mPlayers.emplace_back(new Player());
+	mCashier = std::make_shared<Cashier>(mPlayers);
 }
 
 
@@ -65,10 +66,10 @@ void Game::dealRiver()
 int Game::decideWinner()
 {
 	int i = 0;
-	std::vector<int> rank = { 0, 0, 0, 0, 0 };
+	std::vector<int> rank = std::vector<int>(mPlayers.size(), 0);
 	for (auto player : mPlayers)
 	{
-		rank[i++] = SevenEval::GetRank(player->getCard1()->toValue(), player->getCard2()->toValue(), mDownCards[0]->toValue(), mDownCards[1]->toValue(), mDownCards[2]->toValue(), mDownCards[3]->toValue(), mDownCards[4]->toValue());
+		rank[player->getNo()-1] = SevenEval::GetRank(player->getCard1()->toValue(), player->getCard2()->toValue(), mDownCards[0]->toValue(), mDownCards[1]->toValue(), mDownCards[2]->toValue(), mDownCards[3]->toValue(), mDownCards[4]->toValue());
 	}
 	std::vector<int>::iterator it = std::max_element(rank.begin(), rank.end());
 	bool draw = false;
@@ -79,16 +80,23 @@ int Game::decideWinner()
 
 	}
 	if (draw)
-		return -1;
+	{
+		mCashier->endOfRound(rank, true, mPot);
+	}
+	else
+	{
+		mCashier->endOfRound(rank, false, mPot);
+	}
+	
 	return std::distance(rank.begin(), it);
 
 }
 
 void Game::showWinner()
 {
-	winner = this->decideWinner();
+	//winner = this->decideWinner();
 	if (winner >= 0)
-		std::cout << "\nWinner is Player" << mPlayers[this->decideWinner()]->getNo() << "\n";
+		std::cout << "\nWinner is Player" << winner+1 << "\n";
 	else
 		std::cout << "\nDRAW\n";
 }
@@ -104,18 +112,17 @@ void Game::updateChips()
 			over = true;
 			winner = player->getNo() - 1;
 		}
-		if (winner != -1)
-		{
-			if (k == winner)
-				player->updateChips((mPot - player->getBet()));
-			else
-				player->updateChips(player->getBet()*-1);
-		}
+		
 		player->throwCards();
 		k++;
 
 		std::cout << "Player" << player->getNo() << " has: ";
 		player->printBalance();
+		if(player->getChips() == 0)
+		{
+			int a = 5;
+			std::cout << a;
+		}
 		player->clearBet();
 		total += player->getChips();
 	}
@@ -136,6 +143,7 @@ void Game::erasePlayers()
 	if (toBeErased != mPlayers.end())
 		mPlayers.erase(toBeErased);
 	std::cout << "-------------------------------------\n";
+
 }
 
 void Game::clearRound()
@@ -144,11 +152,17 @@ void Game::clearRound()
 	mDeck->shuffle();
 	mPot = /*smallBlind + bigBlind;*/ 0;
 	requiredToPlay = bigBlind;
+	mCashier->clearBets();
+	for(auto player:mPlayers)
+	{
+		player->setAllIn(false);
+	}
 }
 
 void Game::playRound()
 {
 	initGame();
+	mCashier->startOfRound();
 	requestAction();
 	dealFlop();
 	requestAction();
@@ -156,7 +170,7 @@ void Game::playRound()
 	requestAction();
 	dealRiver();
 	requestAction();
-	decideWinner();
+	winner = decideWinner();
 	showGame();
 	showWinner();
 	updateChips();
@@ -210,6 +224,11 @@ void Game::requestAction()
 	while(canContinue(actions) != true)
 	{
 		int bet = requiredToPlay - mPlayers[currentTurn()]->getBet();
+		if(bet < 0)
+		{
+			int a = 2;
+			std::cout << a;
+		}
 		if (actions.size() != mPlayers.size() )
 			actions.emplace_back(requestAction(mPlayers[getTurn()],bet));
 		else

@@ -4,6 +4,7 @@
 #include <vector>
 #include "Action.h"
 #include "BetAction.h"
+#include "Cashier.h"
 
 class Player
 {
@@ -11,9 +12,12 @@ class Player
 	int mChips, pNo;
 	std::vector<std::shared_ptr<Card>> mDownCards;
 	std::shared_ptr<Action> mAction;
-	bool isPlaying;
+	bool isPlaying, isAllIn;
 	int mBet = 0;
+//	std::weak_ptr<Cashier> mCashier;
 public:
+	void setAllIn(bool allIn);
+	bool getAllIn();
 	static int spNo;
 	Player();
 	int getBet();
