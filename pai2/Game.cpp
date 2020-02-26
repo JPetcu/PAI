@@ -66,7 +66,7 @@ void Game::dealRiver()
 int Game::decideWinner()
 {
 	int i = 0;
-	std::vector<int> rank = std::vector<int>(mPlayers.size(), 0);
+	std::vector<int> rank = std::vector<int>(4, 0);
 	for (auto player : mPlayers)
 	{
 		rank[player->getNo()-1] = SevenEval::GetRank(player->getCard1()->toValue(), player->getCard2()->toValue(), mDownCards[0]->toValue(), mDownCards[1]->toValue(), mDownCards[2]->toValue(), mDownCards[3]->toValue(), mDownCards[4]->toValue());
@@ -118,11 +118,7 @@ void Game::updateChips()
 
 		std::cout << "Player" << player->getNo() << " has: ";
 		player->printBalance();
-		if(player->getChips() == 0)
-		{
-			int a = 5;
-			std::cout << a;
-		}
+		
 		player->clearBet();
 		total += player->getChips();
 	}
@@ -137,11 +133,18 @@ void Game::erasePlayers()
 	std::vector<std::shared_ptr<Player>>::iterator toBeErased = mPlayers.end();
 	for (auto it = mPlayers.begin(); it != mPlayers.end(); it++)
 	{
-		if ((*it)->getChips() <= 0)
-			toBeErased = it;
+		
+			while ((*it)->getChips() <= 0)
+			{
+				toBeErased = it;
+				mPlayers.erase(toBeErased);
+				it = mPlayers.begin();
+			}
+
+		
 	}
-	if (toBeErased != mPlayers.end())
-		mPlayers.erase(toBeErased);
+	/*if (toBeErased != mPlayers.end())
+		mPlayers.erase(toBeErased);*/
 	std::cout << "-------------------------------------\n";
 
 }
@@ -221,18 +224,28 @@ std::shared_ptr<Action> Game::requestAction(std::shared_ptr<Player> player, cons
 void Game::requestAction()
 {
 	std::vector<std::shared_ptr<Action>> actions;
+	int i = 0;
 	while(canContinue(actions) != true)
 	{
 		int bet = requiredToPlay - mPlayers[currentTurn()]->getBet();
-		if(bet < 0)
-		{
-			int a = 2;
-			std::cout << a;
+		
+		if (actions.size() != mPlayers.size())
+		{   
+			int currTurn = currentTurn();
+			actions.emplace_back(requestAction(mPlayers[getTurn()], bet));
+			
 		}
-		if (actions.size() != mPlayers.size() )
-			actions.emplace_back(requestAction(mPlayers[getTurn()],bet));
 		else
-			actions[getTurn()] = requestAction(mPlayers[getTurn()],bet);
+		{
+			int currTurn = currentTurn();
+			actions[getTurn()] = requestAction(mPlayers[getTurn()], bet);
+			
+		}
+		i++;
+		if (i > 10)
+		{
+			std::cout << "Blocked";
+		}
 	}
 	
 }
@@ -245,7 +258,7 @@ void Game::sendDownCards()
 
 bool Game::canContinue(std::vector<std::shared_ptr<Action>> actions)
 {
-	if (actions.size() != mPlayers.size())
+	if (actions.size() < mPlayers.size())
 		return false;
 
 	std::string type = actions[0]->getAction();
@@ -254,6 +267,8 @@ bool Game::canContinue(std::vector<std::shared_ptr<Action>> actions)
 	int k = 0;
 	for (auto action : actions)
 	{
+		if (k > mPlayers.size())
+			break;
 		if (action->getAction() == "BetAction")
 		{
 			raise++;
@@ -287,10 +302,12 @@ bool Game::canContinue(std::vector<std::shared_ptr<Action>> actions)
 
 int Game::getTurn()
 {
-	int turn = playerTurn;
-	playerTurn++;
-	if (playerTurn == mPlayers.size())
-		playerTurn = 0;
+	
+		int turn = playerTurn;
+		playerTurn++;
+		if (playerTurn == mPlayers.size())
+			playerTurn = 0;
+	
 	return turn;
 }
 int Game::currentTurn()

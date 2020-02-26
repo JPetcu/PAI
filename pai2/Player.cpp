@@ -88,22 +88,14 @@ int Player::getNo()
 
 std::shared_ptr<Action> Player::getAction(const int call )
 {
-	if(call > this->getChips())
-	{
-		int a = 2;
-		std::cout << a;
-	}
+	
 	if(this->getNo() == 1)
 	{
-		if(this->getCard1()->toValue() <6 || this->getCard2()->toValue() <6 || this->getCard1()->getFaceValue() == this->getCard2()->getFaceValue() && mChips - mBet > 20)
+		if((this->getCard1()->toValue() <6 || this->getCard2()->toValue() <6 || this->getCard1()->getFaceValue() == this->getCard2()->getFaceValue()) && mChips - mBet > 20)
 		{
 			mAction = std::make_shared<BetAction>(call + 20);
 			mBet += call + 20;
-			if(this->getCard1()->getFaceValue() == this->getCard2()->getFaceValue())
-			{
-				int a = 2;
-				std::cout << a;
-			}
+			
 			return mAction;
 		}
 	}
@@ -127,11 +119,6 @@ std::shared_ptr<Action> Player::getAction(const int call )
 				mAction = std::make_shared<CallAction>(0);
 
 			}
-		}
-		if (this->getBet() > this->getChips())
-		{
-			int a = 2;
-			std::cout << a;
 		}
 		else
 		{

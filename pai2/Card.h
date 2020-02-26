@@ -33,7 +33,9 @@ public:
 	Card();
 	Card(int i, int j);
 	int getFaceValue() { return faceValue; }
-
+	int getSuit() { return suit; }
+	void setFaceValue(int FaceValue) { faceValue = FaceValue; }
+	void setSuit(int Suit) { suit = Suit; }
 	std::string toString();
 	int toValue() { return faceValue * 4 + suit; };
 	~Card() = default;
