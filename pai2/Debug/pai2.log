@@ -1,2 +1,7 @@
-﻿  pai2.cpp
+﻿  EHSCalculator.cpp
+c:\users\jpetcu\source\repos\pai2\pai2\ehscalculator.cpp(81): warning C4018: '<': signed/unsigned mismatch
+c:\users\jpetcu\source\repos\pai2\pai2\ehscalculator.cpp(85): warning C4018: '<': signed/unsigned mismatch
+c:\users\jpetcu\source\repos\pai2\pai2\ehscalculator.cpp(93): warning C4018: '<': signed/unsigned mismatch
+  pai2.cpp
+  Generating Code...
   pai2.vcxproj -> C:\Users\JPetcu\source\repos\pai2\Debug\pai2.exe

@@ -29,7 +29,7 @@ int EHSCalculator::preFlop(std::shared_ptr<Card> card1, std::shared_ptr<Card> ca
 	return value;
 }
 
-int EHSCalculator::decideWinner(std::vector<Card> mDownCards)
+int EHSCalculator::decideWinner(std::vector<std::shared_ptr<Card>> mDownCards)
 {
 	std::vector<int> rank;
 	for (auto player : mPlayers)
@@ -69,11 +69,23 @@ int EHSCalculator::handStrength(std::shared_ptr<Card>& card1, std::shared_ptr<Ca
 			downCards.emplace_back(mDeck->draw());
 		}
 		int winner = decideWinner(downCards);
+		if(winner == 0)
+		{
+			ahead++;
+		}
+		else if(winner == -1)
+		{
+			tied++;
+		}
+		else
+		{
+			behind++;
+		}
 		playersThrow();
 		i++;
 	}
 
-	return 0;
+	return (ahead + tied/2) / (ahead + tied+ behind);
 }
 
 void EHSCalculator::playersReceiveCards()
