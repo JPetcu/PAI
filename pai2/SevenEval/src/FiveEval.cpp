@@ -140,7 +140,7 @@ FiveEval::~FiveEval() {
   delete mFlushRankPtr;
 }
 
-short unsigned FiveEval::GetRank(int const card_one, int const card_two,
+static short unsigned FiveEval::GetRank(int const card_one, int const card_two,
                                  int const card_three, int const card_four,
                                  int const card_five) const {
   if ((mDeckcardsSuit[card_one] == mDeckcardsSuit[card_two]) &&
@@ -160,7 +160,7 @@ short unsigned FiveEval::GetRank(int const card_one, int const card_two,
                   mDeckcardsFace[card_five]];
 }
 
-short unsigned FiveEval::GetRank(int const card_one, const int card_two,
+static short unsigned FiveEval::GetRank(int const card_one, const int card_two,
                                  const int card_three, const int card_four,
                                  const int card_five, const int card_six,
                                  const int card_seven) const {

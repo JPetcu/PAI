@@ -13,10 +13,15 @@ class EHSCalculator
 public:
 	EHSCalculator(std::shared_ptr<Card> card1, std::shared_ptr<Card> card2);
 	int preFlop(std::shared_ptr<Card> card1, std::shared_ptr<Card> card2);
-	int decideWinner(std::vector<std::shared_ptr<Card>> mDownCards);
+	int decideWinner7(std::vector<std::shared_ptr<Card>> mDownCards);
+	int decideWinner5(std::vector<std::shared_ptr<Card>> mDownCards);
+
 	int handStrength(std::shared_ptr<Card>& card1, std::shared_ptr<Card>& card2 , std::vector<std::shared_ptr<Card>> downCards);
+	std::pair<int,int> handPotential(std::shared_ptr<Card>& card1, std::shared_ptr<Card>& card2, std::vector<std::shared_ptr<Card>> downCards);
+	int  handStrengthFlop(std::shared_ptr<Card>& card1, std::shared_ptr<Card>& card2, std::vector<std::shared_ptr<Card>> downCards);
 	void playersReceiveCards();
 	void playersThrow();
+	double EHS(std::shared_ptr<Card>& card1, std::shared_ptr<Card>& card2, std::vector<std::shared_ptr<Card>> downCards);
 	~EHSCalculator() = default;
 };
 
