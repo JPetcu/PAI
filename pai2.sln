@@ -5,6 +5,12 @@ VisualStudioVersion = 15.0.27428.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pai2", "pai2\pai2.vcxproj", "{CF1807A8-2417-4BA8-90B6-66A724141A45}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{56FAC56C-ED84-4984-BB2A-6FABD0B5BE21}"
+	ProjectSection(SolutionItems) = preProject
+		pai2\SevenEval\src\FiveEval.cpp = pai2\SevenEval\src\FiveEval.cpp
+		pai2\SevenEval\src\FiveEval.h = pai2\SevenEval\src\FiveEval.h
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64

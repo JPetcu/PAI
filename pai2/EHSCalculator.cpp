@@ -31,12 +31,12 @@ int EHSCalculator::preFlop(std::shared_ptr<Card> card1, std::shared_ptr<Card> ca
 
 int EHSCalculator::decideWinner7(std::vector<std::shared_ptr<Card>> mDownCards)
 {
-	std::vector<int> rank;
+	std::vector<uint16_t> rank;
 	for (auto player : mPlayers)
 	{
 		rank.emplace_back( SevenEval::GetRank(player->getCard1()->toValue(), player->getCard2()->toValue(), mDownCards[0]->toValue(), mDownCards[1]->toValue(), mDownCards[2]->toValue(), mDownCards[3]->toValue(), mDownCards[4]->toValue()));
 	}
-	std::vector<int>::iterator it = std::max_element(rank.begin(), rank.end());
+	std::vector<uint16_t>::iterator it = std::max_element(rank.begin(), rank.end());
 	if(std::distance(rank.begin(), it) != 0)
 	{
 		return 3;
@@ -58,7 +58,9 @@ int EHSCalculator::decideWinner5(std::vector<std::shared_ptr<Card>> mDownCards)
 	std::vector<int> rank;
 	for (auto player : mPlayers)
 	{
-		rank.emplace_back(FiveEval::GetRank(player->getCard1()->toValue(), player->getCard2()->toValue(), mDownCards[0]->toValue(), mDownCards[1]->toValue(), mDownCards[2]->toValue()));
+		std::shared_ptr<FiveEval> five(new FiveEval());
+		
+		rank.emplace_back(five->GetRank(player->getCard1()->toValue(), player->getCard2()->toValue(), mDownCards[0]->toValue(), mDownCards[1]->toValue(), mDownCards[2]->toValue()));
 	}
 	std::vector<int>::iterator it = std::max_element(rank.begin(), rank.end());
 	if (std::distance(rank.begin(), it) != 0)
@@ -75,15 +77,15 @@ int EHSCalculator::decideWinner5(std::vector<std::shared_ptr<Card>> mDownCards)
 	return 0;
 }
 
-int EHSCalculator::handStrength(std::shared_ptr<Card>& card1, std::shared_ptr<Card>& card2,
+double EHSCalculator::handStrength(std::shared_ptr<Card>& card1, std::shared_ptr<Card>& card2,
 	std::vector<std::shared_ptr<Card>> downCards)
 {
-	int ahead = 0, tied = 0, behind = 0;
+	double ahead = 0, tied = 0, behind = 0;
 	int i = 0;
 	mPlayers[0]->receiveCard(card1);
 	mPlayers[0]->receiveCard(card2);
 
-	while(i<2000)
+	while(i<50)
 	{
 		mDeck->shuffle();
 		playersReceiveCards();
@@ -108,7 +110,7 @@ int EHSCalculator::handStrength(std::shared_ptr<Card>& card1, std::shared_ptr<Ca
 	return (ahead + tied/2) / (ahead + tied+ behind);
 }
 
-std::pair<int,int> EHSCalculator::handPotential(std::shared_ptr<Card>& card1, std::shared_ptr<Card>& card2,
+std::pair<double,double> EHSCalculator::handPotential(std::shared_ptr<Card>& card1, std::shared_ptr<Card>& card2,
 	std::vector<std::shared_ptr<Card>> downCards)
 {
 	int i = 0;
@@ -122,7 +124,7 @@ std::pair<int,int> EHSCalculator::handPotential(std::shared_ptr<Card>& card1, st
 	std::vector<std::shared_ptr<Card>> mDownCards = downCards;
 	
 
-	while (i < 20)
+	while (i < 100)
 	{
 		mDeck->shuffle();
 		playersReceiveCards();
@@ -136,13 +138,13 @@ std::pair<int,int> EHSCalculator::handPotential(std::shared_ptr<Card>& card1, st
 		HPTotal[index] += 1;
 
 		int j = 0;
-		while (j < 100)
+		while (j < 20)
 		{
-			while (downCards.size() < 5)
+			while (mDownCards.size() < 5)
 			{
 				mDownCards.emplace_back(mDeck->draw());
 			}
-			int winner = decideWinner7(downCards);
+			int winner = decideWinner7(mDownCards);
 			if (winner == 0)
 				HP[index][0] += 1;
 			else if (winner == -1)
@@ -162,23 +164,25 @@ std::pair<int,int> EHSCalculator::handPotential(std::shared_ptr<Card>& card1, st
 
 		i++;
 	}
-
+	double  Ppot = 0, Npot = 0;
+	if(HPTotal[behind] + HPTotal[tied] != 0)
 	int  Ppot = (HP[behind][ahead] + HP[behind][tied] / 2 + HP[tied][ahead] / 2) / (HPTotal[behind] + HPTotal[tied]);
 		// Npot: were ahead but fell behind
+	if(HPTotal[ahead] + HPTotal[tied] != 0 )
 	int 	Npot = (HP[ahead][behind] + HP[tied][behind] / 2 + HP[ahead][tied] / 2) / (HPTotal[ahead] + HPTotal[tied]);
 
 	return std::make_pair(Ppot, Npot);
 }
 
-int EHSCalculator::handStrengthFlop(std::shared_ptr<Card>& card1, std::shared_ptr<Card>& card2,
+double EHSCalculator::handStrengthFlop(std::shared_ptr<Card>& card1, std::shared_ptr<Card>& card2,
 	std::vector<std::shared_ptr<Card>> downCards)
 {
-	int ahead = 0, tied = 0, behind = 0;
+	double ahead = 0, tied = 0, behind = 0;
 	int i = 0;
 	mPlayers[0]->receiveCard(card1);
 	mPlayers[0]->receiveCard(card2);
 
-	while (i<2000)
+	while (i<1000)
 	{
 		mDeck->shuffle();
 		playersReceiveCards();
@@ -229,8 +233,8 @@ void EHSCalculator::playersThrow()
 double EHSCalculator::EHS(std::shared_ptr<Card>& card1, std::shared_ptr<Card>& card2,
 	std::vector<std::shared_ptr<Card>> downCards)
 {
-	int HS = handStrengthFlop(card1, card2, downCards);
-	std::pair<int, int> Pot = handPotential(card1, card2, downCards);
+	double HS = handStrength(card1, card2, downCards);
+	std::pair<double, double> Pot = handPotential(card1, card2, downCards);
 
 	return HS * (1 - Pot.second) + (1 - HS) * Pot.first;
 }

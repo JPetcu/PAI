@@ -1,12 +1,15 @@
+#include "../../stdafx.h"
+
 #include "FiveEval.h"
+
 
 FiveEval::FiveEval() :
 mRankPtr(new short unsigned[MAX_FIVE_NONFLUSH_KEY_INT+1]),
 mFlushRankPtr(new short unsigned[MAX_FIVE_FLUSH_KEY_INT+1]) {
-  int unsigned const face[13] = {TWO_FIVE, THREE_FIVE, FOUR_FIVE, FIVE_FIVE,
+  uint32_t const face[13] = {TWO_FIVE, THREE_FIVE, FOUR_FIVE, FIVE_FIVE,
     SIX_FIVE, SEVEN_FIVE, EIGHT_FIVE, NINE_FIVE, TEN_FIVE, JACK_FIVE,
     QUEEN_FIVE, KING_FIVE, ACE_FIVE};
-  int unsigned const face_flush[13] = {TWO_FLUSH, THREE_FLUSH, FOUR_FLUSH,
+  uint32_t const face_flush[13] = {TWO_FLUSH, THREE_FLUSH, FOUR_FLUSH,
     FIVE_FLUSH, SIX_FLUSH, SEVEN_FLUSH, EIGHT_FLUSH, NINE_FLUSH, TEN_FLUSH,
     JACK_FLUSH, QUEEN_FLUSH, KING_FLUSH, ACE_FLUSH};
   
@@ -97,8 +100,8 @@ mFlushRankPtr(new short unsigned[MAX_FIVE_FLUSH_KEY_INT+1]) {
         for (int l = 1; l < k ; ++l) {
           for (int m = 0; m < l; ++m) {
             if (!(i-m == 4 || (i == 12 && j == 3))) {
-              mFlushRankPtr[face_flush[i] + face_flush[j] + face_flush[k] +
-                            face_flush[l] + face_flush[m]] = n++;
+              mFlushRankPtr[face_flush[i] | face_flush[j] | face_flush[k] |
+                            face_flush[l] | face_flush[m]] = n++;
             }
           }
         }
@@ -125,32 +128,32 @@ mFlushRankPtr(new short unsigned[MAX_FIVE_FLUSH_KEY_INT+1]) {
   }
   
   // Low straight flush.
-  mFlushRankPtr[face_flush[0] + face_flush[1] + face_flush[2] +
-                face_flush[3] + face_flush[12]] = n++;
+  mFlushRankPtr[face_flush[0] | face_flush[1] | face_flush[2] |
+                face_flush[3] | face_flush[12]] = n++;
   
   // Usual straight flush.
   for (int i = 0; i < 9; ++i) {
-    mFlushRankPtr[face_flush[i] + face_flush[i+1] + face_flush[i+2] +
-                  face_flush[i+3] + face_flush[i+4]] = n++;
+    mFlushRankPtr[face_flush[i] | face_flush[i+1] | face_flush[i+2] |
+                  face_flush[i+3] | face_flush[i+4]] = n++;
   }
 }
 
 FiveEval::~FiveEval() {
-  delete mRankPtr;
-  delete mFlushRankPtr;
+  delete[] mRankPtr;
+  delete[] mFlushRankPtr;
 }
 
-static short unsigned FiveEval::GetRank(int const card_one, int const card_two,
+short unsigned FiveEval::GetRank(int const card_one, int const card_two,
                                  int const card_three, int const card_four,
                                  int const card_five) const {
   if ((mDeckcardsSuit[card_one] == mDeckcardsSuit[card_two]) &&
       (mDeckcardsSuit[card_one] == mDeckcardsSuit[card_three]) &&
       (mDeckcardsSuit[card_one] == mDeckcardsSuit[card_four]) &&
       (mDeckcardsSuit[card_one] == mDeckcardsSuit[card_five])) {
-    return mFlushRankPtr[mDeckcardsFlush[card_one] +
-                         mDeckcardsFlush[card_two] +
-                         mDeckcardsFlush[card_three] +
-                         mDeckcardsFlush[card_four] +
+    return mFlushRankPtr[mDeckcardsFlush[card_one] |
+                         mDeckcardsFlush[card_two] |
+                         mDeckcardsFlush[card_three] |
+                         mDeckcardsFlush[card_four] |
                          mDeckcardsFlush[card_five]];
   }
   return mRankPtr[mDeckcardsFace[card_one] +
@@ -160,15 +163,14 @@ static short unsigned FiveEval::GetRank(int const card_one, int const card_two,
                   mDeckcardsFace[card_five]];
 }
 
-static short unsigned FiveEval::GetRank(int const card_one, const int card_two,
-                                 const int card_three, const int card_four,
-                                 const int card_five, const int card_six,
-                                 const int card_seven) const {
-  int seven_cards[7] = {card_one, card_two, card_three, card_four, card_five,
-    card_six, card_seven};
+uint16_t FiveEval::GetRank(int const card_one, int const card_two,
+  int const card_three, int const card_four, int const card_five,
+  int const card_six, int const card_seven) const {
+  int const seven_cards[7] = {card_one, card_two, card_three, card_four,
+    card_five, card_six, card_seven};
   int temp[5];
   
-  short unsigned best_rank_so_far = 0, current_rank = 0;
+  uint16_t best_rank_so_far = 0, current_rank = 0;
   int m = 0;
   
   for (int i = 1; i < 7; ++i) {

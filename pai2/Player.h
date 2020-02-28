@@ -5,6 +5,7 @@
 #include "Action.h"
 #include "BetAction.h"
 #include "Cashier.h"
+#include "EHSCalculator.h"
 
 class Player
 {
@@ -14,6 +15,7 @@ class Player
 	std::shared_ptr<Action> mAction;
 	bool isPlaying, isAllIn;
 	int mBet = 0;
+	//std::shared_ptr<EHSCalculator> EHS;
 //	std::weak_ptr<Cashier> mCashier;
 public:
 	void setAllIn(bool allIn);
@@ -23,8 +25,8 @@ public:
 	int getBet();
 	void clearBet();
 	void receiveCard(const std::shared_ptr<Card> &card);
-	std::shared_ptr<Card> getCard1();
-	std::shared_ptr<Card> getCard2();
+	std::shared_ptr<Card>& getCard1();
+	std::shared_ptr<Card>& getCard2();
 	std::string showCards();
 	void getDownCards(std::vector<std::shared_ptr<Card>> downCards);
 	void throwCards();
