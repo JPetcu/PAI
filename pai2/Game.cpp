@@ -155,6 +155,7 @@ void Game::clearRound()
 	mDeck->shuffle();
 	mPot = /*smallBlind + bigBlind;*/ 0;
 	mDownCards = std::vector<std::shared_ptr<Card>>(0, 0);
+	playerTurn = 0;
 	requiredToPlay = bigBlind;
 	mCashier->clearBets();
 	for(auto player:mPlayers)

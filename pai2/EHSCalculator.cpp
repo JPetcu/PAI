@@ -89,8 +89,11 @@ double EHSCalculator::handStrength(std::shared_ptr<Card>& card1, std::shared_ptr
 	{
 		mDeck->shuffle();
 		playersReceiveCards();
-		
-		int winner = decideWinner5(downCards);
+		while (downCards.size() < 5)
+		{
+			downCards.emplace_back(mDeck->draw());
+		}
+		int winner = decideWinner7(downCards);
 		if(winner == 0)
 		{
 			ahead++;
@@ -122,24 +125,27 @@ std::pair<double,double> EHSCalculator::handPotential(std::shared_ptr<Card>& car
 	int index;
 	int size = downCards.size();
 	std::vector<std::shared_ptr<Card>> mDownCards = downCards;
-	
+	std::shared_ptr<FiveEval> five(new FiveEval());
+
+	int ourRank = five->GetRank(card1->toValue(), card2->toValue(), mDownCards[0]->toValue(), mDownCards[1]->toValue(), mDownCards[2]->toValue());
 
 	while (i < 100)
 	{
 		mDeck->shuffle();
 		playersReceiveCards();
-
-		if (preFlop(mPlayers[0]->getCard1(), mPlayers[0]->getCard2()) > preFlop(mPlayers[1]->getCard1(), mPlayers[1]->getCard2()))
+		int theirRank = five->GetRank(mPlayers[1]->getCard1()->toValue(), mPlayers[1]->getCard2()->toValue(), mDownCards[0]->toValue(), mDownCards[1]->toValue(), mDownCards[2]->toValue());
+		if (ourRank > theirRank)
 			index = 0;
-		else if (preFlop(mPlayers[0]->getCard1(), mPlayers[0]->getCard2()) == preFlop(mPlayers[1]->getCard1(), mPlayers[1]->getCard2()))
+		else if (ourRank == theirRank)
 			index = 1;
-		else if (preFlop(mPlayers[0]->getCard1(), mPlayers[0]->getCard2()) < preFlop(mPlayers[1]->getCard1(), mPlayers[1]->getCard2()))
+		else if (ourRank < theirRank)
 			index = 2;
-		HPTotal[index] += 1;
 
 		int j = 0;
 		while (j < 25)
 		{
+			HPTotal[index] += 1;
+
 			while (mDownCards.size() < 5)
 			{
 				mDownCards.emplace_back(mDeck->draw());
@@ -170,6 +176,8 @@ std::pair<double,double> EHSCalculator::handPotential(std::shared_ptr<Card>& car
 		// Npot: were ahead but fell behind
 	if(HPTotal[ahead] + HPTotal[tied] != 0 )
 	 	Npot = (HP[ahead][behind] + HP[tied][behind] / 2 + HP[ahead][tied] / 2) / (HPTotal[ahead] + HPTotal[tied]);
+	if (Npot == 0)
+		std::cout << "\n negative potential = 0\n";
 
 	return std::make_pair(Ppot, Npot);
 }
@@ -186,10 +194,6 @@ double EHSCalculator::handStrengthFlop(std::shared_ptr<Card>& card1, std::shared
 	{
 		mDeck->shuffle();
 		playersReceiveCards();
-		while (downCards.size() < 5)
-		{
-			downCards.emplace_back(mDeck->draw());
-		}
 		int winner = decideWinner5(downCards);
 		if (winner == 0)
 		{
@@ -233,10 +237,26 @@ void EHSCalculator::playersThrow()
 double EHSCalculator::EHS(std::shared_ptr<Card>& card1, std::shared_ptr<Card>& card2,
 	std::vector<std::shared_ptr<Card>> downCards)
 {
-	double HS = handStrength(card1, card2, downCards);
-	std::pair<double, double> Pot = handPotential(card1, card2, downCards);
-	std::cout << "\n Positive potential: " << Pot.first << "\nNegative potential: " << Pot.second << "\n";
+	if (downCards.size() == 3)
+	{
+		double HS = handStrengthFlop(card1, card2, downCards);
+		std::pair<double, double> Pot = handPotential(card1, card2, downCards);
+		std::cout << "\nPositive potential: " << Pot.first << "\nNegative potential: " << Pot.second << "\n";
 
-	return HS * (1 - Pot.second) + (1 - HS) * Pot.first;
+		return HS * (1 - Pot.second) + (1 - HS) * Pot.first;
+	}
+	else if(downCards.size() == 4)
+	{
+		double HS = handStrength(card1, card2, downCards);
+		std::pair<double, double> Pot = handPotential(card1, card2, downCards);
+		std::cout << "\nPositive potential: " << Pot.first << "\nNegative potential: " << Pot.second << "\n";
+
+		return HS * (1 - Pot.second) + (1 - HS) * Pot.first;
+	}
+	else if(downCards.size() == 5)
+	{
+		return handStrength(card1, card2, downCards);
+		
+	}
 }
 

@@ -6,24 +6,24 @@
 
 BETTER_ENUM(Suit, int,
 	SPADE = 0,
-	HEART,
-	DIAMOND,
-	CLUB)
+	HEART, //1
+	DIAMOND,//2
+	CLUB)//3
 
 	BETTER_ENUM(FaceValue, int,
 		ACE = 0,
-		KING,
-		QUEEN,
-		JACK,
-		TEN,
-		NINE,
-		EIGHT,
-		SEVEN,
-		SIX,
-		FIVE,
-		FOUR,
-		THREE,
-		TWO)
+		KING,    //1
+		QUEEN,   //2
+		JACK,    //3
+		TEN,	//4	
+		NINE,	//5
+		EIGHT,	//6
+		SEVEN,	//7
+		SIX,	//8
+		FIVE,	//9
+		FOUR,	//10
+		THREE,	//11
+		TWO)	//12
 
 	class Card
 {

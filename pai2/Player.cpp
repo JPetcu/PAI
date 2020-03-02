@@ -117,19 +117,87 @@ std::shared_ptr<Action> Player::getAction(const int call )
 		{
 			ehs = calc->EHS(this->getCard1(), this->getCard2(), mDownCards) * 100;
 			if (mDownCards.size() == 3)
-			std::cout << "\n EHS flop is: " << ehs << "\n";
+			std::cout << "\nEHS flop is: " << ehs << "\n";
 			else if (mDownCards.size() == 4)
-				std::cout << "\n EHS turn is: " << ehs << "\n";
+				std::cout << "\nEHS turn is: " << ehs << "\n";
 			else if (mDownCards.size() == 5)
-				std::cout << "\n EHS river is: " << ehs << "\n";
+				std::cout << "\nEHS river is: " << ehs << "\n";
 
-			if(ehs > 70)
+
+
+
+			if (ehs > 90)
 			{
-				mAction = std::make_shared<BetAction>(call + 20);
-				mBet += call + 20;
+				if (call + 20 + mBet <= mChips)
+				{
+					mAction = std::make_shared<BetAction>(call + 100);
+					mBet += call + 100;
 
-				return mAction;
+					return mAction;
+				}
+				else
+				{
+					mAction = std::make_shared<BetAction>(mChips - mBet);
+					mBet = mChips;
+
+					return mAction;
+				}
 			}
+			else if (ehs > 80)
+			{
+				if (call + 60 + mBet <= mChips)
+				{
+					mAction = std::make_shared<BetAction>(call + 60);
+					mBet += call + 60;
+
+					return mAction;
+				}
+				else
+				{
+					mAction = std::make_shared<BetAction>(mChips - mBet);
+					mBet = mChips;
+
+					return mAction;
+				}
+			}
+			else if (ehs > 70)
+			{
+				if (call + 40 + mBet <= mChips)
+				{
+					mAction = std::make_shared<BetAction>(call + 40);
+					mBet += call + 40;
+
+					return mAction;
+				}
+				else
+				{
+					mAction = std::make_shared<BetAction>(mChips - mBet);
+					mBet = mChips;
+
+					return mAction;
+				}
+			}
+			else if(ehs > 60)
+			{
+				if (call + 20 + mBet <= mChips)
+				{
+					mAction = std::make_shared<BetAction>(call + 20);
+					mBet += call + 20;
+
+					return mAction;
+				}
+				else
+				{
+					mAction = std::make_shared<BetAction>(mChips - mBet);
+					mBet = mChips;
+
+					return mAction;
+				}
+			}
+			
+			
+			
+
 		}
 		
 	}
