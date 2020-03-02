@@ -1,0 +1,3 @@
+﻿  EHSCalculator.cpp
+C:\Users\Justin\source\repos\PAI\pai2\EHSCalculator.cpp(123,29): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  pai2.vcxproj -> C:\Users\Justin\source\repos\PAI\x64\Debug\pai2.exe

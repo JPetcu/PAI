@@ -160,6 +160,7 @@ void Game::clearRound()
 	for(auto player:mPlayers)
 	{
 		player->setAllIn(false);
+		player->getDownCards(mDownCards);
 	}
 }
 

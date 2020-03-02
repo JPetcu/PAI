@@ -103,7 +103,7 @@ std::shared_ptr<Action> Player::getAction(const int call )
 		if(mDownCards.size() == 0)
 		{
 			ehs = calc->preFlop(this->getCard1(), this->getCard2());
-			std::cout << "\n EHS is: " << ehs << "\n";
+			std::cout << "\n EHS preflop is: " << ehs << "\n";
 
 			if(ehs > 70)
 			{
@@ -116,7 +116,12 @@ std::shared_ptr<Action> Player::getAction(const int call )
 		else 
 		{
 			ehs = calc->EHS(this->getCard1(), this->getCard2(), mDownCards) * 100;
-			std::cout << "\n EHS is: " << ehs << "\n";
+			if (mDownCards.size() == 3)
+			std::cout << "\n EHS flop is: " << ehs << "\n";
+			else if (mDownCards.size() == 4)
+				std::cout << "\n EHS turn is: " << ehs << "\n";
+			else if (mDownCards.size() == 5)
+				std::cout << "\n EHS river is: " << ehs << "\n";
 
 			if(ehs > 70)
 			{

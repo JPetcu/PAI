@@ -85,7 +85,7 @@ double EHSCalculator::handStrength(std::shared_ptr<Card>& card1, std::shared_ptr
 	mPlayers[0]->receiveCard(card1);
 	mPlayers[0]->receiveCard(card2);
 
-	while(i<50)
+	while(i<500)
 	{
 		mDeck->shuffle();
 		playersReceiveCards();
@@ -115,8 +115,8 @@ std::pair<double,double> EHSCalculator::handPotential(std::shared_ptr<Card>& car
 {
 	int i = 0;
 	int ahead = 0, tied = 1, behind = 2;
-	int HP[3][3] =  { {0 , 0, 0},{ 0 , 0, 0 },{ 0 , 0, 0 }};
-	int HPTotal[3] = { 0, 0 , 0};
+	double HP[3][3] =  { {0 , 0, 0},{ 0 , 0, 0 },{ 0 , 0, 0 }};
+	double HPTotal[3] = { 0, 0 , 0};
 	mPlayers[0]->receiveCard(card1);
 	mPlayers[0]->receiveCard(card2);
 	int index;
@@ -138,7 +138,7 @@ std::pair<double,double> EHSCalculator::handPotential(std::shared_ptr<Card>& car
 		HPTotal[index] += 1;
 
 		int j = 0;
-		while (j < 20)
+		while (j < 25)
 		{
 			while (mDownCards.size() < 5)
 			{
@@ -166,10 +166,10 @@ std::pair<double,double> EHSCalculator::handPotential(std::shared_ptr<Card>& car
 	}
 	double  Ppot = 0, Npot = 0;
 	if(HPTotal[behind] + HPTotal[tied] != 0)
-	int  Ppot = (HP[behind][ahead] + HP[behind][tied] / 2 + HP[tied][ahead] / 2) / (HPTotal[behind] + HPTotal[tied]);
+	  Ppot = double((HP[behind][ahead] + HP[behind][tied] / 2 + HP[tied][ahead] / 2) / (HPTotal[behind] + HPTotal[tied]));
 		// Npot: were ahead but fell behind
 	if(HPTotal[ahead] + HPTotal[tied] != 0 )
-	int 	Npot = (HP[ahead][behind] + HP[tied][behind] / 2 + HP[ahead][tied] / 2) / (HPTotal[ahead] + HPTotal[tied]);
+	 	Npot = (HP[ahead][behind] + HP[tied][behind] / 2 + HP[ahead][tied] / 2) / (HPTotal[ahead] + HPTotal[tied]);
 
 	return std::make_pair(Ppot, Npot);
 }
@@ -235,6 +235,7 @@ double EHSCalculator::EHS(std::shared_ptr<Card>& card1, std::shared_ptr<Card>& c
 {
 	double HS = handStrength(card1, card2, downCards);
 	std::pair<double, double> Pot = handPotential(card1, card2, downCards);
+	std::cout << "\n Positive potential: " << Pot.first << "\nNegative potential: " << Pot.second << "\n";
 
 	return HS * (1 - Pot.second) + (1 - HS) * Pot.first;
 }
