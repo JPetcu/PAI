@@ -5,6 +5,26 @@
 #include <typeinfo>
 
 
+void Game::playRound()
+{
+	initGame();
+	if (over == true)
+		return;
+	mCashier->startOfRound();
+	requestAction();
+	dealFlop();
+	requestAction();
+	dealTurn();
+	requestAction();
+	dealRiver();
+	requestAction();
+	winner = decideWinner();
+	showGame();
+	showWinner();
+	updateChips();
+	erasePlayers();
+	clearRound();
+}
 Game::Game() : mDeck(new Deck()), cardCounter(52, 0)
 {
 	mPlayers.emplace_back(new Player());
@@ -17,11 +37,18 @@ Game::Game() : mDeck(new Deck()), cardCounter(52, 0)
 
 void Game::initGame()
 {
+	
 	mPot = /*smallBlind + bigBlind;*/ 0;
 	for (auto player : mPlayers)
 	{
 		player->receiveCard(mDeck->draw());
 		cardCounter[player->getCard1()->toValue()]++;
+		if (player->getChips() == 1600)
+		{
+			over = true;
+			return;
+		}
+
 	}
 	for (auto player : mPlayers)
 	{
@@ -165,24 +192,7 @@ void Game::clearRound()
 	}
 }
 
-void Game::playRound()
-{
-	initGame();
-	mCashier->startOfRound();
-	requestAction();
-	dealFlop();
-	requestAction();
-	dealTurn();
-	requestAction();
-	dealRiver();
-	requestAction();
-	winner = decideWinner();
-	showGame();
-	showWinner();
-	updateChips();
-	erasePlayers();
-	clearRound();
-}
+
 
 
 
@@ -241,7 +251,7 @@ void Game::requestAction()
 		else
 		{
 			int currTurn = currentTurn();
-			actions[getTurn()] = requestAction(mPlayers[getTurn()], bet);
+			actions[currTurn] = requestAction(mPlayers[getTurn()], bet);
 			
 		}
 		i++;
@@ -263,6 +273,8 @@ bool Game::canContinue(std::vector<std::shared_ptr<Action>> actions)
 {
 	if (actions.size() < mPlayers.size())
 		return false;
+	if (mPlayers.size() == 1)
+		return true;
 
 	std::string type = actions[0]->getAction();
 	int raise = 0, call = 0, check = 0, fold = 0;
@@ -298,7 +310,8 @@ bool Game::canContinue(std::vector<std::shared_ptr<Action>> actions)
 	if(fold + raise == mPlayers.size() || 
 		raise + call == mPlayers.size() ||
 		raise + fold + call == mPlayers.size() ||
-		check == mPlayers.size())
+		check == mPlayers.size() ||
+		call + check == mPlayers.size())
 			return true;
 	return false;
 }

@@ -137,8 +137,16 @@ std::shared_ptr<Action> Player::getAction(const int call )
 				}
 				else
 				{
-					mAction = std::make_shared<BetAction>(mChips - mBet);
-					mBet = mChips;
+					if (mChips - mBet > 0)
+					{
+						mAction = std::make_shared<BetAction>(mChips - mBet);
+						mBet = mChips;
+					}
+					else
+					{
+						mAction = std::make_shared<CheckAction>();
+						mBet = mChips;
+					}
 
 					return mAction;
 				}
@@ -154,8 +162,16 @@ std::shared_ptr<Action> Player::getAction(const int call )
 				}
 				else
 				{
-					mAction = std::make_shared<BetAction>(mChips - mBet);
-					mBet = mChips;
+					if (mChips - mBet > 0)
+					{
+						mAction = std::make_shared<BetAction>(mChips - mBet);
+						mBet = mChips;
+					}
+					else
+					{
+						mAction = std::make_shared<CheckAction>();
+						mBet = mChips;
+					}
 
 					return mAction;
 				}
@@ -171,8 +187,16 @@ std::shared_ptr<Action> Player::getAction(const int call )
 				}
 				else
 				{
-					mAction = std::make_shared<BetAction>(mChips - mBet);
-					mBet = mChips;
+					if (mChips - mBet > 0)
+					{
+						mAction = std::make_shared<BetAction>(mChips - mBet);
+						mBet = mChips;
+					}
+					else
+					{
+						mAction = std::make_shared<CheckAction>();
+						mBet = mChips;
+					}
 
 					return mAction;
 				}
@@ -188,8 +212,16 @@ std::shared_ptr<Action> Player::getAction(const int call )
 				}
 				else
 				{
-					mAction = std::make_shared<BetAction>(mChips - mBet);
-					mBet = mChips;
+					if (mChips - mBet > 0)
+					{
+						mAction = std::make_shared<BetAction>(mChips - mBet);
+						mBet = mChips;
+					}
+					else
+					{
+						mAction = std::make_shared<CheckAction>();
+						mBet = mChips;
+					}
 
 					return mAction;
 				}
